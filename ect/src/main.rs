@@ -1,12 +1,12 @@
 mod graph;
 mod model;
 mod mst;
-mod utils;
 mod tsp;
+mod utils;
 
-use crate::graph::CityGraph;
+use crate::model::{Args, CityGraph};
+use crate::mst::build_mst;
 use crate::utils::read_dataset_file;
-use crate::model::Args;
 use clap::Parser;
 use std::time::Instant;
 use tsp::generate_permutations;
@@ -21,17 +21,15 @@ fn build_graph(input_dataset_path: &str, graph_path: &str) {
     println!("Saved graph to path: {}", graph_path);
 }
 
-
-fn build_mst(graph_path: &str, subgraph_path: &str) {
+fn build_mst_subgraph(graph_path: &str, subgraph_path: &str) {
     let loaded_graph = CityGraph::load_graph_from_file(graph_path).expect("Failed to load graph");
-    let mst_graph = loaded_graph.build_mst();
+    let mst_graph = build_mst(&loaded_graph);
     CityGraph::save_graph_to_file(&mst_graph, subgraph_path).unwrap();
 }
 
-fn extract_best_path(graph: &CityGraph, cities: Vec<String>) -> Vec<String> {
-    let permutations = generate_permutations(cities);
-
-}
+// fn extract_best_path(graph: &CityGraph, cities: Vec<String>) -> Vec<String> {
+//     let permutations = generate_permutations(cities);
+// }
 
 // fn run_default_cases() {
 //     let start = Instant::now();
@@ -61,7 +59,7 @@ fn main() {
             build_graph(&input_dataset_path, &graph_path);
         }
         model::Task::BuildMst => {
-            build_mst(&graph_path, &subgraph_path);
+            build_mst_subgraph(&graph_path, &subgraph_path);
         }
         model::Task::MeasureTime => {
             println!("Measuring time... (not implemented)");

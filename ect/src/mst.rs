@@ -1,4 +1,6 @@
-use std::collections::HashMap;
+use crate::model::{City, CityGraph};
+use std::collections::{HashMap, HashSet};
+
 pub struct UnionFind {
     parent: HashMap<String, String>,
 }
@@ -33,4 +35,41 @@ impl UnionFind {
             true
         }
     }
+}
+
+pub fn build_mst(graph: &CityGraph) -> CityGraph {
+    let mut edges = Vec::new();
+    let mut seen = HashSet::new();
+
+    for (from, neighbors) in &graph.adjacency_list {
+        for (to, &distance) in neighbors {
+            let key = if from < to {
+                (from.clone(), to.clone())
+            } else {
+                (to.clone(), from.clone())
+            };
+            if !seen.contains(&key) {
+                seen.insert(key.clone());
+                edges.push((distance, key.0, key.1));
+            }
+        }
+    }
+
+    edges.sort_by_key(|&(distance, _, _)| distance);
+
+    let city_names: Vec<String> = graph.cities.keys().cloned().collect();
+    let mut uf = UnionFind::new(&city_names);
+    let mut mst = CityGraph::new();
+    for city in graph.cities.values() {
+        mst.add_city(city.clone());
+    }
+
+    for (distance, from, to) in edges {
+        if uf.union(&from, &to) {
+            mst.add_edge(&from, &to, distance);
+            mst.add_edge(&to, &from, distance);
+        }
+    }
+
+    mst
 }

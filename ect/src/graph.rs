@@ -1,24 +1,9 @@
-use crate::model::DatasetEdge;
+use crate::model::{City, CityGraph, DatasetEdge};
 use crate::mst::UnionFind;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fs;
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct City {
-    pub name: String,
-    pub country: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct CityGraph {
-    // Map city name to a map of neighbor city name to distance
-    pub adjacency_list: HashMap<String, HashMap<String, u32>>,
-
-    // City metadata by name
-    pub cities: HashMap<String, City>,
-}
 
 impl CityGraph {
     pub fn new() -> Self {
@@ -90,47 +75,5 @@ impl CityGraph {
     // Deserialize graph from JSON string
     pub fn from_json(json: &str) -> serde_json::Result<Self> {
         serde_json::from_str(json)
-    }
-
-    pub fn build_mst(&self) -> CityGraph {
-        let mut edges = Vec::new();
-        let mut seen = HashSet::new();
-
-        // 1. Skupi sve jedinstvene grane
-        for (from, neighbors) in &self.adjacency_list {
-            for (to, &distance) in neighbors {
-                let key = if from < to {
-                    (from.clone(), to.clone())
-                } else {
-                    (to.clone(), from.clone())
-                };
-
-                if !seen.contains(&key) {
-                    seen.insert(key.clone());
-                    edges.push((distance, key.0, key.1));
-                }
-            }
-        }
-
-        // 2. Sortiraj grane po težini
-        edges.sort_by_key(|&(distance, _, _)| distance);
-
-        // 3. Inicijalizuj Union-Find
-        let mut uf = UnionFind::new(&self.cities.keys().cloned().collect::<Vec<_>>());
-
-        // 4. Formiraj novi graf koji je MST
-        let mut mst = CityGraph::new();
-        for city in self.cities.values() {
-            mst.add_city(city.clone());
-        }
-
-        for (distance, from, to) in edges {
-            if uf.union(&from, &to) {
-                mst.add_edge(&from, &to, distance);
-                mst.add_edge(&to, &from, distance);
-            }
-        }
-
-        mst
     }
 }

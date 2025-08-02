@@ -1,35 +1,29 @@
 {
   "adjacency_list": {
-    "Budapest": {
-      "Vienna": 243,
-      "Zagreb": 350
+    "Zurich": {
+      "Munich": 315,
+      "Milan": 217,
+      "Geneva": 280
+    },
+    "Geneva": {
+      "Zurich": 280,
+      "Lyon": 140
+    },
+    "Florence": {
+      "Rome": 280,
+      "Venice": 260
+    },
+    "Venice": {
+      "Florence": 260,
+      "Milan": 275
+    },
+    "Munich": {
+      "Prague": 350,
+      "Frankfurt": 393,
+      "Zurich": 315
     },
     "London": {
       "Brussels": 320
-    },
-    "Munich": {
-      "Frankfurt": 393,
-      "Zurich": 315,
-      "Prague": 350
-    },
-    "Zagreb": {
-      "Budapest": 350
-    },
-    "Amsterdam": {
-      "Brussels": 170
-    },
-    "Geneva": {
-      "Lyon": 140,
-      "Zurich": 280
-    },
-    "Vienna": {
-      "Budapest": 243,
-      "Prague": 250
-    },
-    "Zurich": {
-      "Milan": 217,
-      "Munich": 315,
-      "Geneva": 280
     },
     "Madrid": {
       "Barcelona": 620
@@ -38,127 +32,133 @@
       "Barcelona": 660,
       "Geneva": 140
     },
-    "Venice": {
-      "Florence": 260,
-      "Milan": 275
-    },
-    "Frankfurt": {
-      "Brussels": 380,
-      "Munich": 393
-    },
-    "Rome": {
-      "Florence": 280
-    },
-    "Paris": {
-      "Brussels": 300
-    },
-    "Milan": {
-      "Zurich": 217,
-      "Venice": 275
-    },
-    "Berlin": {
-      "Prague": 350
-    },
-    "Barcelona": {
-      "Madrid": 620,
-      "Lyon": 660
+    "Brussels": {
+      "Paris": 300,
+      "Frankfurt": 380,
+      "London": 320,
+      "Amsterdam": 170
     },
     "Prague": {
       "Berlin": 350,
       "Vienna": 250,
       "Munich": 350
     },
-    "Florence": {
-      "Rome": 280,
-      "Venice": 260
+    "Berlin": {
+      "Prague": 350
     },
-    "Brussels": {
-      "Amsterdam": 170,
-      "Paris": 300,
-      "London": 320,
-      "Frankfurt": 380
+    "Paris": {
+      "Brussels": 300
+    },
+    "Zagreb": {
+      "Budapest": 350
+    },
+    "Frankfurt": {
+      "Munich": 393,
+      "Brussels": 380
+    },
+    "Milan": {
+      "Zurich": 217,
+      "Venice": 275
+    },
+    "Barcelona": {
+      "Lyon": 660,
+      "Madrid": 620
+    },
+    "Budapest": {
+      "Zagreb": 350,
+      "Vienna": 243
+    },
+    "Vienna": {
+      "Prague": 250,
+      "Budapest": 243
+    },
+    "Rome": {
+      "Florence": 280
+    },
+    "Amsterdam": {
+      "Brussels": 170
     }
   },
   "cities": {
-    "Amsterdam": {
-      "name": "Amsterdam",
-      "country": "Netherlands"
-    },
-    "Paris": {
-      "name": "Paris",
+    "Lyon": {
+      "name": "Lyon",
       "country": "France"
-    },
-    "Prague": {
-      "name": "Prague",
-      "country": "Czech Republic"
-    },
-    "Berlin": {
-      "name": "Berlin",
-      "country": "Germany"
-    },
-    "Florence": {
-      "name": "Florence",
-      "country": "Italy"
-    },
-    "Munich": {
-      "name": "Munich",
-      "country": "Germany"
-    },
-    "Brussels": {
-      "name": "Brussels",
-      "country": "Belgium"
-    },
-    "Vienna": {
-      "name": "Vienna",
-      "country": "Austria"
-    },
-    "Zagreb": {
-      "name": "Zagreb",
-      "country": "Croatia"
-    },
-    "Geneva": {
-      "name": "Geneva",
-      "country": "Switzerland"
-    },
-    "Zurich": {
-      "name": "Zurich",
-      "country": "Switzerland"
-    },
-    "Frankfurt": {
-      "name": "Frankfurt",
-      "country": "Germany"
-    },
-    "Barcelona": {
-      "name": "Barcelona",
-      "country": "Spain"
-    },
-    "London": {
-      "name": "London",
-      "country": "United Kingdom"
-    },
-    "Budapest": {
-      "name": "Budapest",
-      "country": "Hungary"
-    },
-    "Milan": {
-      "name": "Milan",
-      "country": "Italy"
     },
     "Madrid": {
       "name": "Madrid",
       "country": "Spain"
     },
+    "Zagreb": {
+      "name": "Zagreb",
+      "country": "Croatia"
+    },
+    "Prague": {
+      "name": "Prague",
+      "country": "Czech Republic"
+    },
+    "Budapest": {
+      "name": "Budapest",
+      "country": "Hungary"
+    },
+    "Amsterdam": {
+      "name": "Amsterdam",
+      "country": "Netherlands"
+    },
+    "Brussels": {
+      "name": "Brussels",
+      "country": "Belgium"
+    },
+    "Zurich": {
+      "name": "Zurich",
+      "country": "Switzerland"
+    },
+    "Geneva": {
+      "name": "Geneva",
+      "country": "Switzerland"
+    },
+    "Berlin": {
+      "name": "Berlin",
+      "country": "Germany"
+    },
+    "London": {
+      "name": "London",
+      "country": "United Kingdom"
+    },
+    "Florence": {
+      "name": "Florence",
+      "country": "Italy"
+    },
     "Rome": {
       "name": "Rome",
       "country": "Italy"
     },
-    "Lyon": {
-      "name": "Lyon",
+    "Milan": {
+      "name": "Milan",
+      "country": "Italy"
+    },
+    "Barcelona": {
+      "name": "Barcelona",
+      "country": "Spain"
+    },
+    "Paris": {
+      "name": "Paris",
       "country": "France"
     },
     "Venice": {
       "name": "Venice",
       "country": "Italy"
+    },
+    "Vienna": {
+      "name": "Vienna",
+      "country": "Austria"
+    },
+    "Munich": {
+      "name": "Munich",
+      "country": "Germany"
+    },
+    "Frankfurt": {
+      "name": "Frankfurt",
+      "country": "Germany"
     }
   }
 }

@@ -1,5 +1,6 @@
 use clap::{Parser, ValueEnum};
-
+use serde::{Deserialize, Serialize};
+use std::collections::{HashMap, HashSet};
 
 /// Represents a single edge record read from the dataset file
 pub struct DatasetEdge {
@@ -34,4 +35,16 @@ pub struct Args {
 
     #[arg(long, value_delimiter = ',')] // comma separated list, optional
     pub cities: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct City {
+    pub name: String,
+    pub country: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct CityGraph {
+    pub adjacency_list: HashMap<String, HashMap<String, u32>>,
+    pub cities: HashMap<String, City>,
 }
