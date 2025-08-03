@@ -60,11 +60,11 @@ fn common_cases(graph: &CityGraph, num_threads: usize, alg: Algorithm) {
     ];
 
     let n_10_cities: Vec<String> = vec![
-        "Barcelona".to_string(),
-        "Paris".to_string(),
+        "Budapest".to_string(),
+        "Berlin".to_string(),
         "Madrid".to_string(),
         "London".to_string(),
-        "Prague".to_string(),
+        "Milan".to_string(),
         "Frankfurt".to_string(),
         "Zurich".to_string(),
         "Lyon".to_string(),
@@ -94,7 +94,6 @@ fn common_cases(graph: &CityGraph, num_threads: usize, alg: Algorithm) {
             println!("Time for 10 cities: {:.2?}", start.elapsed());
         }
         Algorithm::Parallel => {
-            // Podešavanje broja niti u rayon thread pool-u (opciono)
             rayon::ThreadPoolBuilder::new()
                 .num_threads(num_threads)
                 .build_global()
@@ -153,8 +152,7 @@ fn main() {
             build_mst_subgraph(&graph_path, &subgraph_path);
         }
         model::Task::FindBestPath => {
-            let graph =
-                CityGraph::load_graph_from_file(&subgraph_path).expect("Failed to load graph");
+            let graph = CityGraph::load_graph_from_file(&graph_path).expect("Failed to load graph");
 
             common_cases(&graph, num_threads, algorithm);
         }

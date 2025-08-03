@@ -123,7 +123,6 @@ fn score_path(
         let to = index_map[&window[1]];
         let dist = dist_matrix[from][to];
         if dist == u32::MAX {
-            // Nema puta – penalizuj visokom vrednošću
             return u32::MAX;
         }
         total += dist;

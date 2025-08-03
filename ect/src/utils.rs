@@ -3,7 +3,6 @@ use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
 
-/// Reads dataset file and returns Vec of DatasetEdge
 pub fn read_dataset_file<P: AsRef<Path>>(path: P) -> io::Result<Vec<DatasetEdge>> {
     let file = File::open(path)?;
     let reader = io::BufReader::new(file);
@@ -50,16 +49,15 @@ pub fn print_permutations(perms: Vec<Vec<usize>>, cities: Vec<String>) {
 }
 
 pub fn print_distance_matrix(matrix: &Vec<Vec<u32>>, cities: &Vec<String>) {
-    print!("{:>10}", ""); // prazan ugao
+    print!("{:>10}", "");
 
-    // Header: imena gradova
     for city in cities {
         print!("{:>10}", city);
     }
     println!();
 
     for (i, row) in matrix.iter().enumerate() {
-        print!("{:>10}", cities[i]); // redni grad
+        print!("{:>10}", cities[i]);
 
         for &value in row {
             if value == u32::MAX {
