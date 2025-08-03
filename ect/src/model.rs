@@ -24,6 +24,12 @@ pub enum Algorithm {
     Parallel,
 }
 
+#[derive(ValueEnum, Clone, Debug)]
+pub enum Strategy {
+    Bf, // brute-force
+    Nn, // nearest-neighbor
+}
+
 #[derive(Parser, Debug)]
 #[command(author, version, about)]
 pub struct Args {
@@ -31,10 +37,13 @@ pub struct Args {
     pub task: Task,
 
     #[arg(long, value_enum)]
-    pub algorithm: Algorithm,
+    pub algorithm: Option<Algorithm>,
 
-    #[arg(long, value_delimiter = ',')] // comma separated list, optional
-    pub cities: Option<Vec<String>>,
+    #[arg(long, value_enum)]
+    pub strategy: Option<Strategy>, // bf or nn
+
+    #[arg(long)]
+    pub num_threads: Option<usize>, // only used if algorithm is parallel
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

@@ -4,13 +4,15 @@ mod mst;
 mod tsp;
 mod utils;
 
-use crate::model::{Args, CityGraph};
+use crate::model::{Algorithm, Args, CityGraph};
 use crate::mst::build_mst;
 use crate::tsp::{
-    build_distance_matrix, find_best_path, generate_permutations, index_perms_to_city_perms,
+    bf, build_distance_matrix, generate_permutations, index_perms_to_city_perms, parallel_bf,
 };
-use crate::utils::{print_distance_matrix, read_dataset_file, print_permutations};
+use crate::utils::{print_distance_matrix, read_dataset_file};
 use clap::Parser;
+use std::collections::HashMap;
+use std::time::Instant;
 
 const DATASET_PATH: &str = "../dataset/";
 
@@ -28,23 +30,24 @@ fn build_mst_subgraph(graph_path: &str, subgraph_path: &str) {
     CityGraph::save_graph_to_file(&mst_graph, subgraph_path).unwrap();
 }
 
-fn best_path(graph: &CityGraph, cities: Vec<String>) -> Vec<String> {
+fn prepare_dist_matrix(
+    graph: &CityGraph,
+    cities: Vec<String>,
+) -> (Vec<Vec<String>>, Vec<Vec<u32>>, HashMap<String, usize>) {
     let index_perms = generate_permutations((0..cities.len()).collect());
-    // print_permutations(index_perms.clone(), cities.clone());
     let city_perms = index_perms_to_city_perms(index_perms, &cities);
-    println!("Cities: {:?}", cities);    
-    println!("Generated {} city permutations", city_perms.len());
     let (dist_matrix, index_map) = build_distance_matrix(&graph, &cities);
+    println!("Cities len: {:?}", cities.len());
+    println!("Cities: {:?}", cities);
+    println!("Generated {} city permutations", city_perms.len());
     print_distance_matrix(&dist_matrix, &cities);
 
-    let (best_path, best_score) = find_best_path(city_perms, &dist_matrix, &index_map);
-    println!("Best path: {:?} with score: {}", best_path, best_score);
+    // print_permutations(index_perms.clone(), cities.clone());
 
-    best_path
+    (city_perms, dist_matrix, index_map)
 }
 
-fn common_cases(graph: &CityGraph) {
-    //-> Vec<String>
+fn common_cases(graph: &CityGraph, num_threads: usize, alg: Algorithm) {
     let n_8_cities: Vec<String> = vec![
         "Barcelona".to_string(),
         "Paris".to_string(),
@@ -56,7 +59,7 @@ fn common_cases(graph: &CityGraph) {
         "Lyon".to_string(),
     ];
 
-    let n_12_cities: Vec<String> = vec![
+    let n_10_cities: Vec<String> = vec![
         "Barcelona".to_string(),
         "Paris".to_string(),
         "Madrid".to_string(),
@@ -65,58 +68,62 @@ fn common_cases(graph: &CityGraph) {
         "Frankfurt".to_string(),
         "Zurich".to_string(),
         "Lyon".to_string(),
-        "Rome".to_string(),
-        "Berlin".to_string(),
         "Vienna".to_string(),
         "Amsterdam".to_string(),
     ];
 
-    let n_16_cities: Vec<String> = vec![
-        "Barcelona".to_string(),
-        "Paris".to_string(),
-        "Madrid".to_string(),
-        "London".to_string(),
-        "Prague".to_string(),
-        "Frankfurt".to_string(),
-        "Zurich".to_string(),
-        "Lyon".to_string(),
-        "Rome".to_string(),
-        "Berlin".to_string(),
-        "Vienna".to_string(),
-        "Amsterdam".to_string(),
-        "Budapest".to_string(),
-        "Munich".to_string(),
-        "Geneva".to_string(),
-        "Brussels".to_string(),
-    ];
+    match alg {
+        Algorithm::Serial => {
+            println!("\n[Serial] Common case 1");
+            let start = Instant::now();
 
-    let n_20_cities: Vec<String> = vec![
-        "Barcelona".to_string(),
-        "Paris".to_string(),
-        "Madrid".to_string(),
-        "London".to_string(),
-        "Prague".to_string(),
-        "Frankfurt".to_string(),
-        "Zurich".to_string(),
-        "Lyon".to_string(),
-        "Rome".to_string(),
-        "Berlin".to_string(),
-        "Vienna".to_string(),
-        "Amsterdam".to_string(),
-        "Budapest".to_string(),
-        "Munich".to_string(),
-        "Geneva".to_string(),
-        "Brussels".to_string(),
-        "Zagreb".to_string(),
-        "Florence".to_string(),
-        "Venice".to_string(),
-        "Milan".to_string(),
-    ];
+            let (city_perms, dist_matrix, index_map) =
+                prepare_dist_matrix(graph, n_8_cities.clone());
+            let (best_path, best_score) = bf(city_perms, &dist_matrix, &index_map);
 
-    // best_path(graph, n_8_cities.clone());
-    best_path(graph, n_12_cities.clone());
-    // best_path(graph, n_16_cities.clone());
-    // best_path(graph, n_20_cities.clone());
+            println!("BF Path: {:?} with score: {}", best_path, best_score);
+            println!("Time for 8 cities: {:.2?}", start.elapsed());
+
+            println!("\n[Serial] Common case 2");
+            let start = Instant::now();
+
+            let (city_perms, dist_matrix, index_map) =
+                prepare_dist_matrix(graph, n_10_cities.clone());
+            let (best_path, best_score) = bf(city_perms, &dist_matrix, &index_map);
+            println!("Path: {:?} with score: {}", best_path, best_score);
+            println!("Time for 10 cities: {:.2?}", start.elapsed());
+        }
+        Algorithm::Parallel => {
+            // Podešavanje broja niti u rayon thread pool-u (opciono)
+            rayon::ThreadPoolBuilder::new()
+                .num_threads(num_threads)
+                .build_global()
+                .unwrap();
+
+            println!("\n[Parallel] Common case 1");
+            let start = Instant::now();
+            let (city_perms, dist_matrix, index_map) =
+                prepare_dist_matrix(graph, n_8_cities.clone());
+
+            let (best_path, best_score) = parallel_bf(city_perms, &dist_matrix, &index_map);
+
+            println!("BF Path: {:?} with score: {}", best_path, best_score);
+            println!("Time for 8 cities: {:.2?}", start.elapsed());
+
+            println!("\n[Parallel] Common case 2");
+            let start = Instant::now();
+            let (city_perms, dist_matrix, index_map) =
+                prepare_dist_matrix(graph, n_10_cities.clone());
+
+            let (best_path, best_score) = parallel_bf(city_perms, &dist_matrix, &index_map);
+
+            println!(
+                "BF Path: {:?}, num threads: {},  score: {}",
+                best_path, best_score, num_threads
+            );
+            println!("Time for 10 cities: {:.2?}", start.elapsed());
+        }
+    }
 }
 
 fn main() {
@@ -126,13 +133,17 @@ fn main() {
 
     let args = Args::parse();
 
-    println!("Task: {:?}", args.task);
-    println!("Algorithm: {:?}", args.algorithm);
-    if let Some(cities) = &args.cities {
-        println!("Cities: {:?}", cities);
-    } else {
-        println!("No cities specified");
-    }
+    let algorithm = args.algorithm.unwrap_or(model::Algorithm::Serial);
+    let strategy = args.strategy.unwrap_or(model::Strategy::Bf);
+
+    let num_threads = args.num_threads.unwrap_or(1);
+
+    println!("\n=== CLI Parameters ===");
+    println!("Task           : {:?}", args.task);
+    println!("Execution Mode : {:?}", algorithm);
+    println!("Strategy       : {:?}", strategy);
+    println!("Threads        : {}", num_threads);
+    println!("======================\n");
 
     match args.task {
         model::Task::BuildGraph => {
@@ -145,10 +156,7 @@ fn main() {
             let graph =
                 CityGraph::load_graph_from_file(&subgraph_path).expect("Failed to load graph");
 
-            common_cases(&graph);
-
-            println!("Measuring time... (not implemented)");
-            // Implement your timing logic here
+            common_cases(&graph, num_threads, algorithm);
         }
     }
 }

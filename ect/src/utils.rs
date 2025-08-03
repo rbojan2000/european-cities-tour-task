@@ -39,6 +39,7 @@ pub fn read_dataset_file<P: AsRef<Path>>(path: P) -> io::Result<Vec<DatasetEdge>
     Ok(edges)
 }
 
+#[allow(dead_code)]
 pub fn print_permutations(perms: Vec<Vec<usize>>, cities: Vec<String>) {
     println!("Generated {} permutations", perms.len());
 

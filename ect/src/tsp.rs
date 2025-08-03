@@ -1,5 +1,7 @@
 use crate::model::CityGraph;
+use rayon::prelude::*;
 use std::collections::HashMap;
+use std::sync::Arc;
 
 pub fn generate_permutations(items: Vec<usize>) -> Vec<Vec<usize>> {
     let mut results = Vec::new();
@@ -71,7 +73,7 @@ pub fn build_distance_matrix(
     (matrix, index_map)
 }
 
-pub fn find_best_path(
+pub fn bf(
     permutations: Vec<Vec<String>>,
     dist_matrix: &Vec<Vec<u32>>,
     index_map: &HashMap<String, usize>,
@@ -88,6 +90,26 @@ pub fn find_best_path(
     }
 
     (best_path, best_score)
+}
+
+pub fn parallel_bf(
+    permutations: Vec<Vec<String>>,
+    dist_matrix: &Vec<Vec<u32>>,
+    index_map: &HashMap<String, usize>,
+) -> (Vec<String>, u32) {
+    let dist_matrix = Arc::new(dist_matrix.clone());
+    let index_map = Arc::new(index_map.clone());
+
+    permutations
+        .into_par_iter()
+        .map(|path| {
+            let score = score_path(&path, &dist_matrix, &index_map);
+            (path, score)
+        })
+        .reduce(
+            || (Vec::new(), u32::MAX),
+            |best, current| if current.1 < best.1 { current } else { best },
+        )
 }
 
 fn score_path(
