@@ -3,14 +3,21 @@ use rayon::prelude::*;
 use std::collections::HashMap;
 use std::sync::Arc;
 
-pub fn generate_permutations(items: Vec<usize>) -> Vec<Vec<usize>> {
+pub fn generate_permutations_limited(
+    items: Vec<usize>,
+    max_permutations: usize,
+) -> Vec<Vec<usize>> {
     let mut results = Vec::new();
     let mut current = items.clone();
-    permute(&mut current, 0, &mut results);
+    permute_limited(&mut current, 0, &mut results, max_permutations);
     results
 }
 
-fn permute(arr: &mut Vec<usize>, start: usize, results: &mut Vec<Vec<usize>>) {
+fn permute_limited(arr: &mut Vec<usize>, start: usize, results: &mut Vec<Vec<usize>>, max: usize) {
+    if results.len() >= max {
+        return;
+    }
+
     if start >= arr.len() {
         results.push(arr.clone());
         return;
@@ -18,34 +25,12 @@ fn permute(arr: &mut Vec<usize>, start: usize, results: &mut Vec<Vec<usize>>) {
 
     for i in start..arr.len() {
         arr.swap(start, i);
-        permute(arr, start + 1, results);
+        permute_limited(arr, start + 1, results, max);
         arr.swap(start, i);
-    }
-}
-
-fn bfs_distance(graph: &CityGraph, start: &str, goal: &str) -> Option<u32> {
-    use std::collections::{HashMap, VecDeque};
-
-    let mut visited = HashMap::new();
-    let mut queue = VecDeque::new();
-
-    visited.insert(start.to_string(), 0);
-    queue.push_back(start.to_string());
-
-    while let Some(current) = queue.pop_front() {
-        let current_dist = visited[&current];
-        if let Some(neighbors) = graph.adjacency_list.get(&current) {
-            for (neighbor, &weight) in neighbors {
-                let next_dist = current_dist + weight;
-                if !visited.contains_key(neighbor) || visited[neighbor] > next_dist {
-                    visited.insert(neighbor.clone(), next_dist);
-                    queue.push_back(neighbor.clone());
-                }
-            }
+        if results.len() >= max {
+            return;
         }
     }
-
-    visited.get(goal).copied()
 }
 
 pub fn build_distance_matrix(
@@ -61,16 +46,44 @@ pub fn build_distance_matrix(
     let mut matrix = vec![vec![u32::MAX; n]; n];
 
     for (i, from_city) in cities.iter().enumerate() {
+        let distances = bfs_all_distances(graph, from_city);
+
         for (j, to_city) in cities.iter().enumerate() {
             if from_city == to_city {
                 matrix[i][j] = 0;
-            } else if let Some(dist) = bfs_distance(graph, from_city, to_city) {
+            } else if let Some(&dist) = distances.get(to_city) {
                 matrix[i][j] = dist;
             }
         }
     }
 
     (matrix, index_map)
+}
+
+fn bfs_all_distances(graph: &CityGraph, start: &str) -> HashMap<String, u32> {
+    use std::collections::{HashMap, VecDeque};
+
+    let mut visited = HashMap::new();
+    let mut queue = VecDeque::new();
+
+    visited.insert(start.to_string(), 0);
+    queue.push_back(start.to_string());
+
+    while let Some(current) = queue.pop_front() {
+        let current_distance = visited[&current];
+
+        if let Some(neighbors) = graph.adjacency_list.get(&current) {
+            for (neighbor, &weight) in neighbors {
+                let next_dist = current_distance + weight;
+                if !visited.contains_key(neighbor) || visited[neighbor] > next_dist {
+                    visited.insert(neighbor.clone(), next_dist);
+                    queue.push_back(neighbor.clone());
+                }
+            }
+        }
+    }
+
+    visited
 }
 
 pub fn bf(

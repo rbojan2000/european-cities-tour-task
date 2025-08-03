@@ -17,12 +17,13 @@
     - [Find Best Path](#find-best-path)
       - [Strategies](#strategies)
         - [Brute Force (BF)](#brute-force-bf)
-        - [Nearest Neighbour (NN) - TO DO](#nearest-neighbour-nn---to-do)
 - [How to Use](#how-to-use)
   - [Prerequisites](#prerequisites)
   - [Setup Instructions](#setup-instructions)
   - [Commands](#commands)
 - [Evaluation](#evaluation)
+  - [System Information](#system-information)
+  - [Benchmark Summary](#benchmark-summary)
 
 </details>
 
@@ -31,8 +32,6 @@
 # About The Project
 
 This project solves a **Traveling Salesman Problem (TSP)** variant over a graph of European cities using different algorithms such as graph construction, MST approximation, and brute-force pathfinding.
-
----
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -68,9 +67,9 @@ This task generates a Minimum Spanning Tree (MST) from the existing graph, which
 It reads the graph structure from the serialized <a href = "https://github.com/rbojan2000/european-cities-tour-task/blob/main/dataset/graph.json"> <i> dataset/graph.json </i> </a> file, constructs the MST using a suitable algorithm (Kruskal's), and saves the resulting subgraph to a new file <a href = "https://github.com/rbojan2000/european-cities-tour-task/blob/main/dataset/mst_graph.json"> <i> dataset/mst_graph.json </i> </a>.
 
 > [!NOTE]
-> The MST has already been built and is available in dataset/mlt_city_graph_visualization.png.
+> The MST graph is already built and serialized as dataset/mst_graph.json.
 
-An initial visualization of the graph is available as <a href ="https://github.com/rbojan2000/european-cities-tour-task/blob/main/dataset/mlt_city_graph_visualization.png" > <i> mlt_city_graph_visualization.png </i> </a> .
+An initial visualization of the mst subgraph is available as <a href ="https://github.com/rbojan2000/european-cities-tour-task/blob/main/dataset/mlt_city_graph_visualization.png" > <i> mst_city_graph_visualization.png </i> </a> .
 [![](/dataset/mlt_city_graph_visualization.png)](/dataset/mlt_city_graph_visualization.png)
 
 
@@ -84,14 +83,14 @@ The brute-force approach evaluates every possible permutation of the input citie
 
 Steps:
 1. Generate permutations
-- All possible orderings of the input cities are generated.
-- Number of permutations = n! (where n is the number of cities)
+    - All possible orderings of the input cities are generated.
+    - Number of permutations = n! (where n is the number of cities)
 
 2. Build distance matrix
-- For each city pair, find the shortest distance (via BFS) based on the MST graph.
+    - For each city pair, find the shortest distance (via BFS) based on the MST graph.
 
 3. Evaluate all paths
-- Calculate the total distance for each permutation and select the one with the lowest score.
+    - Calculate the total distance for each permutation and select the one with the lowest score.
 
 Example:
 Input cities: `Paris`, `Barcelona`, `Madrid`
@@ -121,11 +120,6 @@ Input cities: `Paris`, `Barcelona`, `Madrid`
 ```yaml
 Path: ["Paris", "Barcelona", "Madrid"] with score: 1470
 ```
-
-##### Nearest Neighbour (NN) - TO DO
-
-
----
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -174,7 +168,19 @@ Below are the examples of how to run the task solution:
 
 # Evaluation
 
-Below are the measured execution times for finding the best paths in two typical cases:
+## System Information
+All tests were executed on the following local development machine:\
+
+- <b> CPU </b>: AMD Ryzen 5 5500U with Radeon Graphics
+  - 6 cores / 12 threads
+  - Base frequency: 2.1 GHz, Max turbo: ~4.05 GHz
+  - Architecture: x86_64
+- <b> RAM </b>:
+  - Total: 18 GiB
+- <b> Operating System </b>: Fedora Linux
+
+## Benchmark Summary
+Below are the measured execution times for finding the best paths in four typical cases:
 
 ### Input Case 1 — 8 Cities
 
@@ -182,21 +188,41 @@ Below are the measured execution times for finding the best paths in two typical
 [Barcelona, Paris, Madrid, London, Prague, Frankfurt, Zurich, Lyon]
 ```
 
-### Input Case 2 — 10 Cities
+### Input Case 2 — 12 Cities
 
 ```yaml
-[Budapest, Berlin, Madrid, London, Milan, Frankfurt, Zurich, Lyon, Vienna, Amsterdam]
+[Barcelona, Paris, Madrid, London, Prague, Frankfurt, Zurich, Lyon, Amsterdam, Vienna, Rome, Milan]
+```
+
+### Input Case 3 — 16 Cities
+
+```yaml
+[Barcelona, Paris, Madrid, London, Prague, Frankfurt, Zurich, Lyon, Amsterdam, Vienna, Rome, Milan, Berlin, Geneva, Florence, Munich]
+```
+
+### Input Case 4 — 20 Cities
+
+```yaml
+[Barcelona, Paris, Madrid, London, Prague, Frankfurt, Zurich, Lyon, Amsterdam, Vienna, Rome, Milan, Berlin, Geneva, Florence, Munich, Budapest, Brussels, Zagreb, Venice]
 ```
 
 | Input Case | Strategy | Mode   | Threads | Time (sec) | Best Path                                                                                       | Score |
 |------|----------|--------|---------|-------------|--------------------------------------------------------------------------------------------------|--------|
-| 1    | BF       | Serial | —       | 0.05835      | ["Madrid", "Barcelona", "Lyon", "Paris", "London", "Frankfurt", "Zurich", "Prague"]             | 3820   |
-| 2    | BF       | Serial | —       | 5.76        |  ["Madrid", "Lyon", "Zurich", "Milan", "Budapest", "Vienna", "Berlin", "Frankfurt", "Amsterdam", "London"] | 4600   |
-| 1    | BF       | Parallel | 2       | 0.04760      | ["Madrid", "Barcelona", "Lyon", "Paris", "London", "Frankfurt", "Zurich", "Prague"]             | 3820   |
-| 2    | BF       | Parallel | 2       | 4.49        |  ["Madrid", "Lyon", "Zurich", "Milan", "Budapest", "Vienna", "Berlin", "Frankfurt", "Amsterdam", "London"] | 4600   |
-| 1    | BF       | Parallel | 5       | 0.05673      | ["Madrid", "Barcelona", "Lyon", "Paris", "London", "Frankfurt", "Zurich", "Prague"]             | 3820   |
-| 2    | BF       | Parallel | 5       | 5.28        |  ["Madrid", "Lyon", "Zurich", "Milan", "Budapest", "Vienna", "Berlin", "Frankfurt", "Amsterdam", "London"] | 4600   |
-| 1    | BF       | Parallel | 8       | 0.05548      | ["Madrid", "Barcelona", "Lyon", "Paris", "London", "Frankfurt", "Zurich", "Prague"]             | 3820   |
-| 2    | BF       | Parallel | 8       | 5.36        |  ["Madrid", "Lyon", "Zurich", "Milan", "Budapest", "Vienna", "Berlin", "Frankfurt", "Amsterdam", "London"] | 4600   |
+| 1    | BF       | Serial | —       | 0.03568      | ["Madrid", "Barcelona", "Lyon", "Paris", "London", "Frankfurt", "Zurich", "Prague"]             | 3820   |
+| 2    | BF       | Serial | —       | 12.56      | ["Barcelona", "Madrid", "Lyon", "Paris", "London", "Amsterdam", "Frankfurt", "Vienna", "Prague", "Zurich", "Milan", "Rome"]             | 5627   |
+| 3    | BF       | Serial | —       | 17.29      | ["Barcelona", "Paris", "Madrid", "London", "Prague", "Frankfurt", "Amsterdam", "Berlin", "Vienna", "Munich", "Zurich", "Geneva", "Lyon", "Milan", "Florence", "Rome"]             | 8685   |
+| 4    | BF       | Serial | —       | 18.60      | ["Barcelona", "Paris", "Madrid", "London", "Prague", "Frankfurt", "Zurich", "Lyon", "Amsterdam", "Milan", "Geneva", "Brussels", "Berlin", "Munich", "Vienna", "Budapest", "Zagreb", "Venice", "Florence", "Rome"]             | 11565   |
+| 1    | BF       | Parallel | 2       | 0.04445      | ["Madrid", "Barcelona", "Lyon", "Paris", "London", "Frankfurt", "Zurich", "Prague"]             | 3820   |
+| 2    | BF       | Parallel | 2       | 12.81      | ["Barcelona", "Madrid", "Lyon", "Paris", "London", "Amsterdam", "Frankfurt", "Vienna", "Prague", "Zurich", "Milan", "Rome"]             | 5627   |
+| 3    | BF       | Parallel | 2       | 16.52      | ["Barcelona", "Paris", "Madrid", "London", "Prague", "Frankfurt", "Amsterdam", "Berlin", "Vienna", "Munich", "Zurich", "Geneva", "Lyon", "Milan", "Florence", "Rome"]             | 8685   |
+| 4    | BF       | Parallel | 2       | 18.54      | ["Barcelona", "Paris", "Madrid", "London", "Prague", "Frankfurt", "Zurich", "Lyon", "Amsterdam", "Milan", "Geneva", "Brussels", "Berlin", "Munich", "Vienna", "Budapest", "Zagreb", "Venice", "Florence", "Rome"]             | 11565   |
+| 1    | BF       | Parallel | 3       | 0.03694      | ["Madrid", "Barcelona", "Lyon", "Paris", "London", "Frankfurt", "Zurich", "Prague"]             | 3820   |
+| 2    | BF       | Parallel | 3       | 12.53      | ["Barcelona", "Madrid", "Lyon", "Paris", "London", "Amsterdam", "Frankfurt", "Vienna", "Prague", "Zurich", "Milan", "Rome"]             | 5627   |
+| 3    | BF       | Parallel | 3       | 16.98      | ["Barcelona", "Paris", "Madrid", "London", "Prague", "Frankfurt", "Amsterdam", "Berlin", "Vienna", "Munich", "Zurich", "Geneva", "Lyon", "Milan", "Florence", "Rome"]             | 8685   |
+| 4    | BF       | Parallel | 3       | 16.32      | ["Barcelona", "Paris", "Madrid", "London", "Prague", "Frankfurt", "Zurich", "Lyon", "Amsterdam", "Milan", "Geneva", "Brussels", "Berlin", "Munich", "Vienna", "Budapest", "Zagreb", "Venice", "Florence", "Rome"]             | 11565   |
+| 1    | BF       | Parallel | 8       | 0.04082      | ["Madrid", "Barcelona", "Lyon", "Paris", "London", "Frankfurt", "Zurich", "Prague"]             | 3820   |
+| 2    | BF       | Parallel | 8       | 20.47      | ["Barcelona", "Madrid", "Lyon", "Paris", "London", "Amsterdam", "Frankfurt", "Vienna", "Prague", "Zurich", "Milan", "Rome"]             | 5627   |
+| 3    | BF       | Parallel | 8       | 15.32      | ["Barcelona", "Paris", "Madrid", "London", "Prague", "Frankfurt", "Amsterdam", "Berlin", "Vienna", "Munich", "Zurich", "Geneva", "Lyon", "Milan", "Florence", "Rome"]             | 8685   |
+| 4    | BF       | Parallel | 8       | 16.94      | ["Barcelona", "Paris", "Madrid", "London", "Prague", "Frankfurt", "Zurich", "Lyon", "Amsterdam", "Milan", "Geneva", "Brussels", "Berlin", "Munich", "Vienna", "Budapest", "Zagreb", "Venice", "Florence", "Rome"]             | 11565   |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

@@ -1,3 +1,5 @@
+// Bojan Radovic e2 121/2023
+
 mod graph;
 mod model;
 mod mst;
@@ -7,14 +9,17 @@ mod utils;
 use crate::model::{Algorithm, Args, CityGraph};
 use crate::mst::build_mst;
 use crate::tsp::{
-    bf, build_distance_matrix, generate_permutations, index_perms_to_city_perms, parallel_bf,
+    bf, build_distance_matrix, generate_permutations_limited, index_perms_to_city_perms,
+    parallel_bf,
 };
 use crate::utils::{print_distance_matrix, read_dataset_file};
 use clap::Parser;
+use rayon::join;
 use std::collections::HashMap;
 use std::time::Instant;
 
 const DATASET_PATH: &str = "../dataset/";
+const MAX_PERMUTATIONS: usize = 10000000; // 10! < MAX_PERMUTATIONS < 11!
 
 fn build_graph(input_dataset_path: &str, graph_path: &str) {
     let edges = read_dataset_file(input_dataset_path).expect("Failed to read dataset");
@@ -34,7 +39,7 @@ fn prepare_dist_matrix(
     graph: &CityGraph,
     cities: Vec<String>,
 ) -> (Vec<Vec<String>>, Vec<Vec<u32>>, HashMap<String, usize>) {
-    let index_perms = generate_permutations((0..cities.len()).collect());
+    let index_perms = generate_permutations_limited((0..cities.len()).collect(), MAX_PERMUTATIONS);
     let city_perms = index_perms_to_city_perms(index_perms, &cities);
     let (dist_matrix, index_map) = build_distance_matrix(&graph, &cities);
     println!("Cities len: {:?}", cities.len());
@@ -43,6 +48,33 @@ fn prepare_dist_matrix(
     print_distance_matrix(&dist_matrix, &cities);
 
     // print_permutations(index_perms.clone(), cities.clone());
+
+    (city_perms, dist_matrix, index_map)
+}
+
+fn prepare_dist_matrix_parallel(
+    graph: &CityGraph,
+    cities: Vec<String>,
+) -> (Vec<Vec<String>>, Vec<Vec<u32>>, HashMap<String, usize>) {
+    let cities_clone_for_perms = cities.clone();
+    let cities_clone_for_matrix = cities.clone();
+
+    let (index_perms, (dist_matrix, index_map)) = join(
+        || {
+            generate_permutations_limited(
+                (0..cities_clone_for_perms.len()).collect(),
+                MAX_PERMUTATIONS,
+            )
+        },
+        || build_distance_matrix(graph, &cities_clone_for_matrix),
+    );
+
+    let city_perms = index_perms_to_city_perms(index_perms, &cities);
+
+    println!("Cities len: {:?}", cities.len());
+    println!("Cities: {:?}", cities);
+    println!("Generated {} city permutations", city_perms.len());
+    print_distance_matrix(&dist_matrix, &cities);
 
     (city_perms, dist_matrix, index_map)
 }
@@ -59,17 +91,61 @@ fn common_cases(graph: &CityGraph, num_threads: usize, alg: Algorithm) {
         "Lyon".to_string(),
     ];
 
-    let n_10_cities: Vec<String> = vec![
-        "Budapest".to_string(),
-        "Berlin".to_string(),
+    let n_12_cities: Vec<String> = vec![
+        "Barcelona".to_string(),
+        "Paris".to_string(),
         "Madrid".to_string(),
         "London".to_string(),
-        "Milan".to_string(),
+        "Prague".to_string(),
         "Frankfurt".to_string(),
         "Zurich".to_string(),
         "Lyon".to_string(),
-        "Vienna".to_string(),
         "Amsterdam".to_string(),
+        "Vienna".to_string(),
+        "Rome".to_string(),
+        "Milan".to_string(),
+    ];
+
+    let n_16_cities: Vec<String> = vec![
+        "Barcelona".to_string(),
+        "Paris".to_string(),
+        "Madrid".to_string(),
+        "London".to_string(),
+        "Prague".to_string(),
+        "Frankfurt".to_string(),
+        "Zurich".to_string(),
+        "Lyon".to_string(),
+        "Amsterdam".to_string(),
+        "Vienna".to_string(),
+        "Rome".to_string(),
+        "Milan".to_string(),
+        "Berlin".to_string(),
+        "Geneva".to_string(),
+        "Florence".to_string(),
+        "Munich".to_string(),
+    ];
+
+    let n_20_cities: Vec<String> = vec![
+        "Barcelona".to_string(),
+        "Paris".to_string(),
+        "Madrid".to_string(),
+        "London".to_string(),
+        "Prague".to_string(),
+        "Frankfurt".to_string(),
+        "Zurich".to_string(),
+        "Lyon".to_string(),
+        "Amsterdam".to_string(),
+        "Vienna".to_string(),
+        "Rome".to_string(),
+        "Milan".to_string(),
+        "Berlin".to_string(),
+        "Geneva".to_string(),
+        "Florence".to_string(),
+        "Munich".to_string(),
+        "Budapest".to_string(),
+        "Brussels".to_string(),
+        "Zagreb".to_string(),
+        "Venice".to_string(),
     ];
 
     match alg {
@@ -88,10 +164,28 @@ fn common_cases(graph: &CityGraph, num_threads: usize, alg: Algorithm) {
             let start = Instant::now();
 
             let (city_perms, dist_matrix, index_map) =
-                prepare_dist_matrix(graph, n_10_cities.clone());
+                prepare_dist_matrix(graph, n_12_cities.clone());
             let (best_path, best_score) = bf(city_perms, &dist_matrix, &index_map);
             println!("Path: {:?} with score: {}", best_path, best_score);
-            println!("Time for 10 cities: {:.2?}", start.elapsed());
+            println!("Time for 12 cities: {:.2?}", start.elapsed());
+
+            println!("\n[Serial] Common case 3");
+            let start = Instant::now();
+
+            let (city_perms, dist_matrix, index_map) =
+                prepare_dist_matrix(graph, n_16_cities.clone());
+            let (best_path, best_score) = bf(city_perms, &dist_matrix, &index_map);
+            println!("Path: {:?} with score: {}", best_path, best_score);
+            println!("Time for 16 cities: {:.2?}", start.elapsed());
+
+            println!("\n[Serial] Common case 4");
+            let start = Instant::now();
+
+            let (city_perms, dist_matrix, index_map) =
+                prepare_dist_matrix(graph, n_20_cities.clone());
+            let (best_path, best_score) = bf(city_perms, &dist_matrix, &index_map);
+            println!("Path: {:?} with score: {}", best_path, best_score);
+            println!("Time for 20 cities: {:.2?}", start.elapsed());
         }
         Algorithm::Parallel => {
             rayon::ThreadPoolBuilder::new()
@@ -102,7 +196,7 @@ fn common_cases(graph: &CityGraph, num_threads: usize, alg: Algorithm) {
             println!("\n[Parallel] Common case 1");
             let start = Instant::now();
             let (city_perms, dist_matrix, index_map) =
-                prepare_dist_matrix(graph, n_8_cities.clone());
+                prepare_dist_matrix_parallel(graph, n_8_cities.clone());
 
             let (best_path, best_score) = parallel_bf(city_perms, &dist_matrix, &index_map);
 
@@ -112,15 +206,41 @@ fn common_cases(graph: &CityGraph, num_threads: usize, alg: Algorithm) {
             println!("\n[Parallel] Common case 2");
             let start = Instant::now();
             let (city_perms, dist_matrix, index_map) =
-                prepare_dist_matrix(graph, n_10_cities.clone());
+                prepare_dist_matrix_parallel(graph, n_12_cities.clone());
 
             let (best_path, best_score) = parallel_bf(city_perms, &dist_matrix, &index_map);
 
             println!(
                 "BF Path: {:?}, num threads: {},  score: {}",
-                best_path, best_score, num_threads
+                best_path, num_threads, best_score
             );
-            println!("Time for 10 cities: {:.2?}", start.elapsed());
+            println!("Time for 12 cities: {:.2?}", start.elapsed());
+
+            println!("\n[Parallel] Common case 3");
+            let start = Instant::now();
+            let (city_perms, dist_matrix, index_map) =
+                prepare_dist_matrix_parallel(graph, n_16_cities.clone());
+
+            let (best_path, best_score) = parallel_bf(city_perms, &dist_matrix, &index_map);
+
+            println!(
+                "BF Path: {:?}, num threads: {},  score: {}",
+                best_path, num_threads, best_score
+            );
+            println!("Time for 12 cities: {:.2?}", start.elapsed());
+
+            println!("\n[Parallel] Common case 4");
+            let start = Instant::now();
+            let (city_perms, dist_matrix, index_map) =
+                prepare_dist_matrix_parallel(graph, n_20_cities.clone());
+
+            let (best_path, best_score) = parallel_bf(city_perms, &dist_matrix, &index_map);
+
+            println!(
+                "BF Path: {:?}, num threads: {},  score: {}",
+                best_path, num_threads, best_score
+            );
+            println!("Time for 12 cities: {:.2?}", start.elapsed());
         }
     }
 }
