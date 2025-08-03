@@ -38,3 +38,35 @@ pub fn read_dataset_file<P: AsRef<Path>>(path: P) -> io::Result<Vec<DatasetEdge>
 
     Ok(edges)
 }
+
+pub fn print_permutations(perms: Vec<Vec<usize>>, cities: Vec<String>) {
+    println!("Generated {} permutations", perms.len());
+
+    for (i, perm) in perms.iter().enumerate() {
+        let path: Vec<&String> = perm.iter().map(|&index| &cities[index]).collect();
+        println!("Perm {}: {:?}", i + 1, path);
+    }
+}
+
+pub fn print_distance_matrix(matrix: &Vec<Vec<u32>>, cities: &Vec<String>) {
+    print!("{:>10}", ""); // prazan ugao
+
+    // Header: imena gradova
+    for city in cities {
+        print!("{:>10}", city);
+    }
+    println!();
+
+    for (i, row) in matrix.iter().enumerate() {
+        print!("{:>10}", cities[i]); // redni grad
+
+        for &value in row {
+            if value == u32::MAX {
+                print!("{:>10}", "∞");
+            } else {
+                print!("{:>10}", value);
+            }
+        }
+        println!();
+    }
+}

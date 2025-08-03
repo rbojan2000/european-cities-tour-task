@@ -1,6 +1,6 @@
 use clap::{Parser, ValueEnum};
 use serde::{Deserialize, Serialize};
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 /// Represents a single edge record read from the dataset file
 pub struct DatasetEdge {
@@ -15,7 +15,7 @@ pub struct DatasetEdge {
 pub enum Task {
     BuildGraph,
     BuildMst,
-    MeasureTime,
+    FindBestPath,
 }
 
 #[derive(ValueEnum, Clone, Debug)]

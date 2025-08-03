@@ -1,4 +1,4 @@
-use crate::model::{City, CityGraph};
+use crate::model::CityGraph;
 use std::collections::{HashMap, HashSet};
 
 pub struct UnionFind {
