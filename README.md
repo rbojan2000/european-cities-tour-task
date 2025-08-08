@@ -17,6 +17,7 @@
     - [Find Best Path](#find-best-path)
       - [Strategies](#strategies)
         - [Brute Force (BF)](#brute-force-bf)
+    - [Room for Improvement](#room-for-improvement)
 - [How to Use](#how-to-use)
   - [Prerequisites](#prerequisites)
   - [Setup Instructions](#setup-instructions)
@@ -122,6 +123,27 @@ Path: ["Paris", "Barcelona", "Madrid"] with score: 1470
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+## Room for Improvement
+1. Avoid generating all permutations at once
+  - Instead of calculating all permutations upfront (which is computationally expensive and memory-intensive), generate permutations on the fly, based on their index.
+  - How it works:
+    - There are n! total permutations.
+    - For any number i in the range 0..n!, i-th can be deriveed using factorial number system (a.k.a. Lehmer code).
+  - Steps:
+    - Start with a list of city indices: [0, 1, 2, ..., n-1]
+    - Convert the number i into factorial base (factoradic representation).
+    - Use that to determine the permutation by selecting indices accordingly.
+  - Example:
+  ```yaml
+  let cities = vec!["London", "Paris", "Lyon"];
+  let i = 5; // index of permutation we want
+  ```
+  - Total permutations: 3! = 6
+  - Factoradic of 5 (with padding for length 3) = [2, 1, 0]
+  - Apply this to [0, 1, 2] → gives permutation indices: [2, 1, 0]
+  - Resulting permutation: ["Lyon", "Paris", "London"]
 
 # How to Use
 
